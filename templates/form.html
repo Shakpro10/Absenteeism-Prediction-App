@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Absenteeism Prediction</title>
+    <link href="{{ url_for('static', path='css/styles.css') }}" type="text/css" rel="stylesheet">	
+</head>
+<body>
+
+    <!--header start-->
+	<div id="header">
+        <img alt="Logistic Regression Image" height="146px" width="15%" border="5px" align="right" src="{{ url_for('static', path='images/LogisticRegression.jpg') }}" />
+        <h1 align="center" style="color: wheat; background-color: black; font-size: 60px; font-family: algerian">EMPLOYEE ABSENTEEISM PREDICTION</h1>
+    </div>
+    <!--header end-->
+    
+    <!--About Me Section start-->
+	<div>
+        <h2><span>Problem Statement</span></h2>
+        <p>
+            Employee absenteeism negatively affects productivity. This project predicts whether an employee will be excessively absent during a workday, defined as absence for more than 3 hours. The model uses factors such as: Number of children, Number of pets, Body mass index (BMI), Reasons for absence, Age, Transportation expenses, Education level and Month of the year.
+        </p>
+		
+        <p>
+			<strong>Goal:</strong> Predicting absenteeism in advance to enhance workforce planning and reduce productivity losses.
+		</p>
+    </div>
+	<!--About Me Section end-->
+	<br/>
+	<br/>
+
+    <form action="/predict" method="post">
+        <h1 id="form-heading">Prediction</h1>
+        <div id="input-wrapper">
+			<div class="select-int">
+				<!-- Reason for Absence as a select dropdown -->
+				<label class="text" for="Reason_for_Absence">Reason for Absence:</label>
+				<select class="reason" id="Reason_for_Absence" name="Reason_for_Absence" required>
+					<option value="1">Infectious and Parasitic Diseases</option>
+					<option value="2">Neoplasms</option>
+					<option value="3">Blood and Immune Diseases</option>
+				s	<option value="4">Endocrine and Metabolic Diseases</option>
+					<option value="5">Mental and Behavioural Disorders</option>
+					<option value="6">Nervous System Diseases</option>
+					<option value="7">Eye Diseases</option>
+					<option value="8">Ear and Mastoid Diseases</option>
+					<option value="9">Circulatory System Diseases</option>
+					<option value="10">Respiratory Diseases</option>
+					<option value="11">Digestive Diseases</option>
+					<option value="12">Diseases of the skin and subcutaneous tissue</option>
+					<option value="13">Musculoskeletal and connective tissue Diseases</option>
+					<option value="14">Genitourinary Diseases</option>
+					<option value="15">Pregnancy, childbirth and the puerperium</option>
+					<option value="16">Perinatal Conditions</option>
+					<option value="17">Congenital Disorders and deformations</option>
+					<option value="18">Unclassified Symptoms and Signs</option>
+					<option value="19">Injury, Poisoning, and Consequences</option>
+					<option value="20">External causes of morbidity and mortality</option>
+					<option value="21">Factors influencing Health Status</option>
+					<option value="22">Patient Follow-up</option>
+					<option value="23">Medical Consultation</option>
+					<option value="24">Blood Donation</option>
+					<option value="25">Lab Examination</option>
+					<option value="26">Unjustified Absence</option>
+					<option value="27">Physiotherapy</option>
+					<option value="28">Dental Consultation</option>
+				</select><br><br>
+			</div>
+
+			<div>
+				<ul class="select-int">
+					<li>
+						<!-- Age as a select dropdown -->
+						<label class="text" for="Age">Age:</label>
+						<select class="input-select" id="Age" name="Age" required>
+							<option value="18">18</option>
+							<option value="19">19</option>
+							<option value="20">20</option>
+							<option value="21">21</option>
+							<option value="22">22</option>
+							<option value="23">23</option>
+							<option value="24">24</option>
+							<option value="25">25</option>
+							<option value="26">26</option>
+							<option value="27">27</option>
+							<option value="28">28</option>
+							<option value="29">29</option>
+							<option value="30">30</option>
+							<option value="31">31</option>
+							<option value="32">32</option>
+							<option value="33">33</option>
+							<option value="34">34</option>
+							<option value="35">35</option>
+							<option value="36">36</option>
+							<option value="37">37</option>
+							<option value="38">38</option>
+							<option value="39">39</option>
+							<option value="40">40</option>
+							<option value="41">41</option>
+							<option value="42">42</option>
+							<option value="43">43</option>
+							<option value="44">44</option>
+							<option value="45">45</option>
+							<option value="46">46</option>
+							<option value="47">47</option>
+							<option value="48">48</option>
+							<option value="49">49</option>
+							<option value="50">50</option>
+							<option value="51">51</option>
+							<option value="52">52</option>
+							<option value="53">53</option>
+							<option value="54">54</option>
+							<option value="55">55</option>
+							<option value="56">56</option>
+							<option value="57">57</option>
+							<option value="58">58</option>
+							<option value="59">59</option>
+							<option value="60">60</option>
+							<option value="61">61</option>
+							<option value="62">62</option>
+							<option value="63">63</option>
+							<option value="64">64</option>
+							<option value="65">65</option>
+						</select><br><br>
+					</li>
+
+					<li>
+						<!-- Month as a select dropdown -->
+						<label class="text" for="Month">Month:</label>
+						<select class="input-select" id="Month" name="Month" required>
+							<option value="1">January</option>
+							<option value="2">February</option>
+							<option value="3">March</option>
+							<option value="4">April</option>
+							<option value="5">May</option>
+							<option value="6">June</option>
+							<option value="7">July</option>
+							<option value="8">August</option>
+							<option value="9">September</option>
+							<option value="10">October</option>
+							<option value="11">November</option>
+							<option value="12">December</option>
+						</select><br><br>
+					</li>
+
+					<li>
+						<!-- Body Mass Index as a select dropdown -->
+						<label class="text" for="Body_Mass_Index">Body Mass Index:</label>
+						<select class="input-select" id="Body_Mass_Index" name="Body_Mass_Index" required>
+							<option value="18">18</option>
+							<option value="19">19</option>
+							<option value="20">20</option>
+							<option value="21">21</option>
+							<option value="22">22</option>
+							<option value="23">23</option>
+							<option value="24">24</option>
+							<option value="25">25</option>
+							<option value="26">26</option>
+							<option value="27">27</option>
+							<option value="28">28</option>
+							<option value="29">29</option>
+							<option value="30">30</option>
+							<option value="31">31</option>
+							<option value="32">32</option>
+							<option value="33">33</option>
+							<option value="34">34</option>
+							<option value="35">35</option>
+							<option value="36">36</option>
+							<option value="37">37</option>
+							<option value="38">38</option>
+							<option value="39">39</option>
+							<option value="40">40</option>
+						</select><br><br>
+					</li>
+				</ul>
+			</div>
+
+			<div class="select-int">
+				<!-- Transportation Expense -->
+				<label class="text" for="Transportation_Expense">Transportation Expense:</label><br>
+				<input class="input-trans" type="number" id="Transportation_Expense" name="Transportation_Expense" placeholder="in dollars"><br><br>
+			</div>
+
+			<div class="select-int">
+				<!-- Education -->
+				<span class="text">Education:</span><br>
+				<label class="input-level" for="high_school">High School</label>
+				<input class="input-edu" type="radio" id="high_school" name="Education" value="0" required>
+				<label class="input-level" for="bachelors">Bachelors</label>
+				<input class="input-edu" type="radio" id="bachelors" name="Education" value="1" required>
+				<label class="input-level" for="postgraduate">Postgraduate</label>
+				<input class="input-edu" type="radio" id="postgraduate" name="Education" value="1" required>
+				<label class="input-level" for="masters">Masters</label>
+				<input class="input-edu" type="radio" id="masters" name="Education" value="1" required>
+				<label class="input-level" for="phd">PhD</label>
+				<input class="input-edu" type="radio" id="phd" name="Education" value="1" required><br><br>
+			</div>
+
+			<div class="select-int">
+				<!-- Children -->
+				<label class="text" for="Children">Number of Children:</label>
+				<input class="input-cp" type="number" id="Children" name="Children" placeholder="3" min="0" max="100" required><br><br>
+			</div>
+
+			<div class="select-int">
+				<!-- Pets -->
+				<label class="text" for="Pets">Number of Pets:</label>
+				<input class="input-cp" type="number" id="Pets" name="Pets" placeholder="1" min="0" max="100" required><br><br>
+			</div>
+		</div>
+		
+		<div id="button">
+			<!-- Submit button -->
+			<button class="btn" type="reset">Reset</button>
+			<button class="btn" type="submit">Predict</button>
+		</div>
+    </form>
+</body>
+</html>

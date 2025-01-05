@@ -1,0 +1,233 @@
+body {
+    background: linear-gradient(135deg, 
+        #FFFFFF, 
+        #F5F5F5, 
+        #F0E68C,  
+        #D3D3D3,  
+        #87CEEB   
+    );
+    background-size: 400% 400%;                            
+    animation: fadeBackground 15s ease infinite;            
+    padding: 16px;                                       
+}
+
+@keyframes fadeBackground {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+form {
+    text-align: center;
+    width: 800px;
+    background-color: #E7E2E2;
+    border: 1px solid #8C8787;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#form-heading {
+    font-size: 48px;                           
+    font-weight: 700;                          
+    text-transform: uppercase;                
+    text-align: center;                        
+    background: linear-gradient(90deg, #3498db, #9b59b6);
+	background-clip: border-box;
+    -webkit-background-clip: text;            
+    -webkit-text-fill-color: transparent;     
+    letter-spacing: 2px;                       
+    text-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); 
+    animation: fadeIn 1.2s ease-in-out;        
+    position: relative;                       
+    display: inline-block;                     
+    padding: 10px 30px;                       
+    cursor: pointer;                           
+    transition: transform 0.3s ease, box-shadow 0.3s ease; 
+}
+
+#form-heading::before {
+    content: '';                              
+    position: absolute;                        
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(128, 128, 128, 0.1); 
+    border-radius: 8px;                    
+    z-index: -1;                               
+}
+
+/* Hover Effect */
+#form-heading:hover::before {
+    background-color: rgba(128, 128, 128, 0.3); 
+}
+
+/* Hover Lift Effect */
+#form-heading:hover {
+    transform: scale(1.05);                   
+    text-shadow: 0 6px 12px rgba(0, 0, 0, 0.2); 
+}
+
+/* Keyframe Animation */
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+        transform: translateY(-20px);         
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);               
+    }
+}
+
+div ul li {
+    display: inline-block;
+}
+
+
+.text {
+	font-size: 20px;
+	font-weight: 600;
+}
+
+#input-wrapper {
+	padding: 10px;
+}
+
+.reason {
+	width: 400px;
+	border: 1px solid #8C8787;
+	border-radius: 8px;
+	margin-left: 10px;
+	font-size: 15px;
+	padding: 2.5px;
+}
+
+.select-int {
+	display: flex;
+    align-items: flex-start;
+	border: 0;
+	margin-left: 10px;
+	font-size: 10px;
+	padding: 15px;
+}
+
+#select {
+	padding: 10px;
+	font-weight: 600;
+}
+
+.input-select {
+	width: 100px;
+	border: 1px solid #8C8787;
+	border-radius: 8px;
+	margin-left: 10px;
+	margin-right: 40px;
+	text-align: center;
+	align-items: center;
+	font-size: 15px;
+	padding: 2.5px;
+}
+
+.input-trans {
+	width: 80px;
+	border: 1px solid #8C8787;
+	border-radius: 8px;
+	margin-left: 10px;
+	font-size: 15px;
+	padding: 2.5px;
+}
+
+.input-level {
+	font-size: 15px;
+	font-weight: 600;
+	margin-left: 10px;
+	margin-top: 4px;
+}
+
+.input-edu {
+	width: 20px;
+	margin-left: 2px;
+	margin-right: 35px;
+	margin-top: 5px;
+	align-items: center;
+	padding: 2.5px;
+}
+
+.input-cp {
+	width: 40px;
+	border: 1px solid #8C8787;
+	border-radius: 8px;
+	margin-left: 10px;
+	font-size: 15px;
+	padding: 2.5px;
+}
+
+#button {
+	padding-bottom: 20px;
+}
+
+.btn {
+	background-color: #0056ff;
+	padding: 12px;
+	border-radius: 8px;
+	font-size: 16px;
+	font-weight: 600;
+	color: white;
+	border: 0;
+	margin-right: 10px;
+	cursor: pointer;
+	box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.btn:hover {
+	background-color: #2980b9;
+	box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
+}
+
+.btn:active {
+    background-color: purple;
+}
+
+.btn:focus {
+    outline: 3px solid #a29bfe;
+    outline-offset: 2px;
+}
+
+.link {  
+    background-color: #0056ff;
+    padding: 12px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    color: white;
+    border: 0;
+    margin-right: 10px;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    text-decoration: none;  
+}
+
+.link:hover {
+    background-color: #2980b9;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
+}
+
+.link:active {
+    background-color: purple;
+}
+
+.link:focus {
+    outline: 3px solid #a29bfe;
+    outline-offset: 2px;
+}

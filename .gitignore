@@ -1,0 +1,46 @@
+# Byte-compiled / Cached files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environments
+fastapienv/
+.fastapienv/
+
+# Testing
+.pytest_cache/
+coverage/
+*.coverage
+nosetests.xml
+coverage.xml
+*.log
+
+# Development environments and IDEs
+.vscode/
+.idea/
+*.sublime-workspace
+
+# Docker and Build Artifacts
+Dockerfile
+.dockerignore
+
+# Heroku (Optional)
+# Ignore Heroku config if not deploying to Heroku, otherwise remove this line
+# heroku.yml
+
+# System / OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Local databases and runtime files
+*.db
+*.sqlite3
+instance/
+*.pid
+
+# Git and versioning
+.git
