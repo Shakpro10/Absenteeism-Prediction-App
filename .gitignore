@@ -44,3 +44,4 @@ instance/
 
 # Git and versioning
 .git
+.git/
