@@ -45,3 +45,7 @@ instance/
 # Git and versioning
 .git
 .git/
+
+# jupyter checkpoint
+notebooks/**/.ipynb_checkpoints/
+
