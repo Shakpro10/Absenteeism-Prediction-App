@@ -160,7 +160,7 @@ ________________________________________
 Deployment
 
 The app is deployed on Heroku, aws and accessible through the following URL:
-Absenteeism Prediction App on Heroku
+Absenteeism Prediction App on Heroku: https://absenteeism-predictor-95f9fbe5a2b8.herokuapp.com/
 ________________________________________
 
 
