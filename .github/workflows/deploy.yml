@@ -1,0 +1,162 @@
+name: Pipeline for Absenteeism Prediction App
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  setup:
+    name: Setup Virtual Environment
+    runs-on: ubuntu-latest
+    outputs:
+      venv_path: ${{ steps.setup-env.outputs.venv_path }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Create virtual environment
+        id: setup-env
+        run: |
+          python -m venv fastapienv
+          echo "VENV_PATH=$(pwd)/fastapienv" >> $GITHUB_ENV
+
+      - name: Install dependencies
+        run: |
+          source ${{ env.VENV_PATH }}/bin/activate
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install flake8
+
+  build:
+    name: Build and Lint with flake8
+    runs-on: ubuntu-latest
+    needs: setup
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Reuse Virtual Environment and Run flake8 linting
+        run: |
+          source ${{ env.VENV_PATH }}/bin/activate
+          mkdir -p logs  # Create a folder to store logs
+          # stop the build if there are Python syntax errors or undefined names. The GitHub editor is 127 chars wide
+          flake8 . --count --select=E9,F63,F7,F82 --max-line-length=127 --ignore=F401 --show-source --statistics > logs/flake8.log || exit 1
+
+      - name: Upload flake8 Logs
+        uses: actions/upload-artifact@v3
+        with:
+          name: flake8-logs
+          path: logs/  
+
+  test:
+    name: Run Pytest
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Reuse Virtual Environment and Run tests
+        run: |
+          source ${{ env.VENV_PATH }}/bin/activate
+          mkdir -p logs  # Ensure logs folder exists
+          pytest test.py > logs/test.log || exit 1
+
+      - name: Upload Logs Folder
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-logs
+          path: logs/
+
+  dockerize:
+    name: Build, Test, and Push Docker Image
+    runs-on: ubuntu-latest
+    needs: test
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Check Docker Secrets
+        run: |
+          if [ -z "${{ secrets.DOCKER_USERNAME }}" ] || [ -z "${{ secrets.DOCKER_PASSWORD }}" ]; then
+            echo "Docker secrets are missing! Exiting..."
+            exit 1
+          fi
+
+      - name: Build and Push Docker Image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ secrets.DOCKER_USERNAME }}/absenteeism_prediction_app:${{ github.sha }}
+
+      - name: Test Docker Image
+        run: |
+          mkdir -p logs
+          docker run --rm ${{ secrets.DOCKER_USERNAME }}/absenteeism_prediction_app:${{ github.sha }} python -m pytest test.py > logs/docker_test.log || exit 1
+
+      - name: Upload Logs Folder
+        uses: actions/upload-artifact@v3
+        with:
+          name: docker-test-logs
+          path: logs/
+
+  deploy:
+    name: Deploy to Heroku
+    runs-on: ubuntu-latest
+    needs: dockerize
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Login to Heroku
+        uses: akhileshns/heroku-deploy@v4.1.3
+        with:
+          heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
+          heroku_app_name: ${{ secrets.HEROKU_APP_NAME }}
+          heroku_email: ${{ secrets.HEROKU_EMAIL }}
+          usedocker: true
+
+      - name: Scale dynos
+        run: |
+          heroku ps:scale web=1 --app ${{ secrets.HEROKU_APP_NAME }}
+
+      - name: Check deployment status
+        run: |
+          heroku open --app ${{ secrets.HEROKU_APP_NAME }}
+
+      - name: Health Check
+        run: |
+          sleep 30
+          curl --fail https://${{ secrets.HEROKU_APP_NAME }}.herokuapp.com || exit 1
+
+      - name: Verify HTTP Response
+        run: |
+          HTTP_STATUS=$(curl --write-out "%{http_code}" --silent --output /dev/null https://${{ secrets.HEROKU_APP_NAME }}.herokuapp.com)
+          if [ "$HTTP_STATUS" -ne 200 ]; then
+            echo "Deployment failed with HTTP status $HTTP_STATUS. Exiting..."
+            exit 1
+          fi
+
+env:
+  FASTAPI_ENV: production
