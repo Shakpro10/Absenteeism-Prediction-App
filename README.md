@@ -97,15 +97,6 @@ ________________________________________
 <br>
 
 
-## API Endpoints
-
-Endpoint <span style="padding-left: 2em;">Method</span> <span style="padding-left: 2em;">Description</span><br>
-/	     <span style="padding-left: 5.7em;">GET</span> <span style="padding-left: 3.8em;">Renders the form for predictions</span><br>
-/predict <span style="padding-left: 2.7em;">POST</span> <span style="padding-left: 3.1em;">Accepts form data and makes predictions</span>
-________________________________________
-<br>
-
-
 ## Example Prediction
 
 Inputs Example:
