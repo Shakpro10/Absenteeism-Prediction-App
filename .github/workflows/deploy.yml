@@ -28,7 +28,7 @@ jobs:
         id: setup-env
         run: |
           python -m venv fastapienv
-          echo "VENV_PATH=$(pwd)/fastapienv" >> $GITHUB_ENV
+          echo "venv_path=$(pwd)/fastapienv" >> $GITHUB_ENV
           echo "::set-output name=venv_path::$(pwd)/fastapienv"
         
       - name: Verify Virtual Environment Path
