@@ -54,12 +54,12 @@ jobs:
 
       - name: Debugging step - Verify Virtual Environment Path
         run: |
-          echo "venv path in build: ${{ env.venv_path }}"
-          ls -l ${{ env.venv_path }}
+          echo "venv path in build: ${{ needs.setup.outputs.venv_path }}"
+          ls -l ${{ needs.setup.outputs.venv_path }}
 
       - name: Reuse Virtual Environment and Run flake8 linting
         run: |
-          source ${{ env.venv_path }}/bin/activate
+          source ${{ needs.setup.outputs.venv_path }}/bin/activate
           mkdir -p logs  # Create a folder to store logs
           # stop the build if there are Python syntax errors or undefined names. The GitHub editor is 127 chars wide
           flake8 . --count --select=E9,F63,F7,F82 --max-line-length=127 --ignore=F401 --show-source --statistics > logs/flake8.log || exit 1
@@ -81,12 +81,12 @@ jobs:
 
       - name: Debugging step - Verify Virtual Environment Path
         run: |
-          echo "venv path in test: ${{ env.venv_path }}"
-          ls -l ${{ env.venv_path }}
+          echo "venv path in test: ${{ needs.setup.outputs.venv_path }}"
+          ls -l ${{ needs.setup.outputs.venv_path }}
 
       - name: Reuse Virtual Environment and Run tests
         run: |
-          source ${{ env.venv_path }}/bin/activate
+          source ${{ needs.setup.outputs.venv_path }}/bin/activate
           mkdir -p logs  # Ensure logs folder exists
           pytest test.py > logs/test.log || exit 1
 
