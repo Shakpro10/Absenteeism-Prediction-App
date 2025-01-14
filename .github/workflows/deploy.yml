@@ -72,6 +72,14 @@ jobs:
           echo "venv path in build: ${{ needs.setup.outputs.venv_path }}"
           ls -l ${{ needs.setup.outputs.venv_path }}
 
+      - name: Debugging Environment Before Linting
+        run: |
+          echo "Debugging Environment:"
+          source ${{ needs.setup.outputs.venv_path }}/bin/activate
+          python --version
+          pip list
+          ls -l ${{ needs.setup.outputs.venv_path }}
+
       - name: Reuse Virtual Environment and Run flake8 linting
         run: |
           source ${{ needs.setup.outputs.venv_path }}/bin/activate
