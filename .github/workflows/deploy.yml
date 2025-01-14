@@ -24,10 +24,24 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Create virtual environment
+      - name: Cache Virtual Environment
+        uses: actions/cache@v4
+        with:
+          path: fastapienv
+          key: ${{ runner.os }}-python-${{ hashFiles('requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-python-
+
+      - name: Create virtual environment if not cached
         id: setup-env
         run: |
-          python -m venv fastapienv
+          if [ ! -d "fastapienv" ]; then
+            python -m venv fastapienv
+            source fastapienv/bin/activate
+            python -m pip install --upgrade pip
+            pip install -r requirements.txt
+            pip install flake8
+          fi
           echo "venv_path=$(pwd)/fastapienv" >> $GITHUB_ENV
           echo "::set-output name=venv_path::$(pwd)/fastapienv"
         
@@ -35,19 +49,6 @@ jobs:
         run: |
           echo "Virtual environment path is ${{ env.venv_path }}"
           ls -l ${{ env.venv_path }}
-
-      - name: Install dependencies
-        run: |
-          source ${{ env.venv_path }}/bin/activate
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install flake8
-
-      - name: Save Virtual Environment Artifact 
-        uses: actions/upload-artifact@v3
-        with:
-          name: fastapienv
-          path: fastapienv
 
   build:
     name: Build and Lint with flake8
@@ -58,10 +59,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Restore Virtual Environment Artifact 
-        uses: actions/download-artifact@v3
+      - name: Restore Virtual Environment Cache 
+        uses: actions/cache@v4
         with:
-          name: fastapienv
+          path: fastapienv
+          key: ${{ runner.os }}-python-${{ hashFiles('requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-python-
 
       - name: Debugging step - Verify Virtual Environment Path
         run: |
@@ -90,10 +94,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Restore Virtual Environment Artifact 
-        uses: actions/download-artifact@v3
+      - name: Restore Virtual Environment Cache 
+        uses: actions/cache@v4
         with:
-          name: fastapienv
+          path: fastapienv
+          key: ${{ runner.os }}-python-${{ hashFiles('requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-python-
 
       - name: Debugging step - Verify Virtual Environment Path
         run: |
