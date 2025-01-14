@@ -126,7 +126,9 @@ jobs:
         run: |
           source ${{ needs.setup.outputs.venv_path }}/bin/activate
           mkdir -p logs  # Ensure logs folder exists
-          pytest test.py > logs/test.log || exit 1
+          pytest test.py | tee logs/test.log 
+          exit 1
+        shell: bash
 
       - name: Upload Logs Folder
         uses: actions/upload-artifact@v3
