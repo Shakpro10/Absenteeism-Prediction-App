@@ -85,7 +85,8 @@ jobs:
           source ${{ needs.setup.outputs.venv_path }}/bin/activate
           mkdir -p logs  # Create a folder to store logs
           # stop the build if there are Python syntax errors or undefined names. The GitHub editor is 127 chars wide
-          flake8 . --count --select=E9,F63,F7,F82 --ignore=F401 --show-source --statistics > logs/flake8.log || exit 1
+          flake8 . --count --select=E9,F63,F7,F82 --max-line-length=127 --ignore=F401 --show-source --statistics | tee logs/flake8.log
+          exit 1
 
       - name: Upload flake8 Logs
         uses: actions/upload-artifact@v3
