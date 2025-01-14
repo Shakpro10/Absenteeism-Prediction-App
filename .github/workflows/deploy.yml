@@ -43,6 +43,12 @@ jobs:
           pip install -r requirements.txt
           pip install flake8
 
+      - name: Save Virtual Environment Artifact 
+        uses: actions/upload-artifact@v3
+        with:
+          name: fastapienv
+          path: fastapienv
+
   build:
     name: Build and Lint with flake8
     runs-on: ubuntu-latest
@@ -51,6 +57,11 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Restore Virtual Environment Artifact 
+        uses: actions/download-artifact@v3
+        with:
+          name: fastapienv
 
       - name: Debugging step - Verify Virtual Environment Path
         run: |
@@ -68,7 +79,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: flake8-logs
-          path: logs/  
+          path: logs/
 
   test:
     name: Run Pytest
@@ -78,6 +89,11 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Restore Virtual Environment Artifact 
+        uses: actions/download-artifact@v3
+        with:
+          name: fastapienv
 
       - name: Debugging step - Verify Virtual Environment Path
         run: |
