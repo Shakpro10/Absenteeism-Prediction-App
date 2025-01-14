@@ -9,6 +9,8 @@ import joblib
 import pandas as pd
 import numpy as np
 import logging
+from typing import Iterator, Sequence
+
 
 # Setup logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
