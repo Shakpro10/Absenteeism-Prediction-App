@@ -90,6 +90,9 @@ jobs:
             while IFS= read -r line; do
               echo "::error file=$(echo $line | cut -d':' -f1),line=$(echo $line | cut -d':' -f2),col=$(echo $line | cut -d':' -f3)::$(echo $line | cut -d':' -f4-)"
             done < logs/flake8.log
+            exit 1  # Fail the job if errors exist
+          else
+            echo "No flake8 issues found."  # Indicate success if no issues are found
           fi
         shell: bash
 
