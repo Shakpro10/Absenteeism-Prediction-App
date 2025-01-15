@@ -219,7 +219,7 @@ jobs:
       - name: HTTP Response Check
         run: |
           attempts=0
-          max_attempts=5
+          max_attempts=2
           while [ $attempts -lt $max_attempts ]; do
             echo "Attempting HTTP response check at attempt $attempts"
             HTTP_STATUS=$(curl --write-out "%{http_code}" --silent --output /dev/null --fail "${{ steps.get_url.outputs.app_url }}")
@@ -241,10 +241,10 @@ jobs:
       - name: Verify Dyno Status via Heroku CLI
         run: |
           attempts=0
-          max_attempts=5
+          max_attempts=2
           while [ $attempts -lt $max_attempts ]; do
             echo "Checking Dyno Status at attempt $attempts"
-            DYNOS_STATUS=$(heroku ps -a ${{ secrets.HEROKU_APP_NAME }} | grep web | awk '{print $2}')
+            DYNOS_STATUS=$(heroku ps -a ${{ secrets.HEROKU_APP_NAME }} | grep web | awk '{print $3}')
             if [[ "$DYNOS_STATUS" == "up" ]]; then
               echo "Dyno is up after $attempts attempts"
               exit 0
