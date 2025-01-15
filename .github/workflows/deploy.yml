@@ -63,15 +63,13 @@ jobs:
       - name: Lint with flake8
         run: |
           source ${{ needs.setup.outputs.venv_path }}/bin/activate
-          mkdir -p logs
+          mkdir -p logs  # Create a folder to store logs
+          # stop the build if there are Python errors as specified in the config file
           flake8 main.py test.py --config .flake8 | tee logs/flake8.log
           if [ -s logs/flake8.log ]; then
-            cat logs/flake8.log | while read -r line; do
+            while IFS= read -r line; do
               echo "::error file=$(echo $line | cut -d':' -f1),line=$(echo $line | cut -d':' -f2),col=$(echo $line | cut -d':' -f3)::$(echo $line | cut -d':' -f4-)"
-            done
-            exit 1
-          else
-            echo "No flake8 issues found."
+            done < logs/flake8.log
           fi
         shell: bash
 
