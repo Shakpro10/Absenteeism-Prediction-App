@@ -120,7 +120,7 @@ jobs:
       - name: Debugging step - Verify Virtual Environment Path
         run: |
           echo "venv path in test: ${{ needs.setup.outputs.venv_path }}"
-          ls -l ${{ needs.setup.outputs.venv_path }}
+          ls -l ${{ needs.setup.outputs.venv_path }}/fastapienv
 
       - name: Reuse Virtual Environment and Run tests
         run: |
