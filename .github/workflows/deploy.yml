@@ -80,37 +80,37 @@ jobs:
           path: logs/
 
   test:
-    name: Run Pytest
-    runs-on: ubuntu-latest
-    needs: build
+  name: Run Pytest
+  runs-on: ubuntu-latest
+  needs: build
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+  steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
 
-      - name: Restore Virtual Environment Cache
-        uses: actions/cache@v4
-        with:
-          path: fastapienv
-          key: ${{ runner.os }}-python-${{ hashFiles('requirements.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-python-
+    - name: Restore Virtual Environment Cache
+      uses: actions/cache@v4
+      with:
+        path: fastapienv
+        key: ${{ runner.os }}-python-${{ hashFiles('requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-python-
 
-      - name: Run tests
-        run: |
-          source ${{ needs.setup.outputs.venv_path }}/bin/activate
-          mkdir -p logs
-          pytest test.py -v | tee logs/test.log
-          if [ $? -ne 0 ]; then
-            exit 1
-          fi
-        shell: bash
+    - name: Run tests
+      run: |
+        source ${{ needs.setup.outputs.venv_path }}/bin/activate
+        mkdir -p logs
+        pytest test.py -v | tee logs/test.log
+        if [ $? -ne 0 ]; then
+          exit 1
+        fi
+      shell: bash
 
-      - name: Upload Test Logs
-        uses: actions/upload-artifact@v3
-        with:
-          name: test-logs
-          path: logs/
+    - name: Upload Test Logs
+      uses: actions/upload-artifact@v3
+      with:
+        name: test-logs
+        path: logs/
 
   dockerize:
     name: Build, Test, and Push Docker Image
