@@ -38,17 +38,10 @@ jobs:
           if [ ! -d "fastapienv" ]; then
             python -m venv fastapienv
             source fastapienv/bin/activate
-            python -m pip install --upgrade pip
-            pip install -r requirements.txt
-            pip install flake8
+            pip install --upgrade pip
+            pip install -r requirements.txt flake8
           fi
-          echo "venv_path=$(pwd)/fastapienv" >> $GITHUB_ENV
           echo "venv_path=$(pwd)/fastapienv" >> $GITHUB_OUTPUT
-        
-      - name: Verify Virtual Environment Path
-        run: |
-          echo "Virtual environment path is ${{ env.venv_path }}"
-          ls -l ${{ env.venv_path }}
 
   build:
     name: Build and Lint with flake8
@@ -59,7 +52,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Restore Virtual Environment Cache 
+      - name: Restore Virtual Environment Cache
         uses: actions/cache@v4
         with:
           path: fastapienv
@@ -67,32 +60,20 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-python-
 
-      - name: Debugging step - Verify Virtual Environment Path
-        run: |
-          echo "venv path in build: ${{ needs.setup.outputs.venv_path }}"
-          ls -l ${{ needs.setup.outputs.venv_path }}
-
-      - name: Debugging Environment Before Linting
-        run: |
-          echo "Debugging Environment:"
-          source ${{ needs.setup.outputs.venv_path }}/bin/activate
-          python --version
-          pip list
-          ls -l ${{ needs.setup.outputs.venv_path }}
-
-      - name: Reuse Virtual Environment and Run flake8 linting
+      - name: Lint with flake8
         run: |
           source ${{ needs.setup.outputs.venv_path }}/bin/activate
-          mkdir -p logs  # Create a folder to store logs
-          # stop the build if there are Python errors as specified in the config file
+          mkdir -p logs
           flake8 main.py test.py --config .flake8 | tee logs/flake8.log
           if [ -s logs/flake8.log ]; then
-            while IFS= read -r line; do
+            cat logs/flake8.log | while read -r line; do
               echo "::error file=$(echo $line | cut -d':' -f1),line=$(echo $line | cut -d':' -f2),col=$(echo $line | cut -d':' -f3)::$(echo $line | cut -d':' -f4-)"
-            done < logs/flake8.log
+            done
+            exit 1
+          else
+            echo "No flake8 issues found."
           fi
         shell: bash
-
 
       - name: Upload flake8 Logs
         uses: actions/upload-artifact@v3
@@ -109,7 +90,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Restore Virtual Environment Cache 
+      - name: Restore Virtual Environment Cache
         uses: actions/cache@v4
         with:
           path: fastapienv
@@ -117,22 +98,17 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-python-
 
-      - name: Debugging step - Verify Virtual Environment Path
-        run: |
-          echo "venv path in test: ${{ needs.setup.outputs.venv_path }}"
-          ls -l ${{ needs.setup.outputs.venv_path }}
-
-      - name: Reuse Virtual Environment and Run tests
+      - name: Run tests
         run: |
           source ${{ needs.setup.outputs.venv_path }}/bin/activate
-          echo "Python version: $(python --version)"
-          echo "Installed packages: $(pip list)"
-          mkdir -p logs  # Ensure logs folder exists
-          pytest test.py | tee logs/test.log 
-          exit 1  # to force failure if needed
+          mkdir -p logs
+          pytest test.py -v | tee logs/test.log
+          if [ $? -ne 0 ]; then
+            exit 1
+          fi
         shell: bash
-        
-      - name: Upload Logs Folder
+
+      - name: Upload Test Logs
         uses: actions/upload-artifact@v3
         with:
           name: test-logs
