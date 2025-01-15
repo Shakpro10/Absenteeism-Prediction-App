@@ -129,7 +129,10 @@ jobs:
           echo "Installed packages: $(pip list)"
           mkdir -p logs  # Ensure logs folder exists
           pytest test.py | tee logs/test.log 
-          exit 1  # to force failure if needed
+          exit_code=$?
+          if [ $exit_code -ne 0 ]; then
+            exit $exit_code
+          fi
         shell: bash
         
       - name: Upload Logs Folder
