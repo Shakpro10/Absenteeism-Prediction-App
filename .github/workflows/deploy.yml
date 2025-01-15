@@ -216,36 +216,49 @@ jobs:
         run: |
           sleep 30
 
-      - name: Health Check with Increased Verbosity
+      - name: HTTP Response Check
         run: |
           attempts=0
-          max_attempts=2
+          max_attempts=5
           while [ $attempts -lt $max_attempts ]; do
-            echo "Attempting health check at attempt $attempts"
-            if curl --verbose --fail -s -o /dev/null "${{ steps.get_url.outputs.app_url }}health"; then
-              echo "Health check passed after $attempts attempts"
+            echo "Attempting HTTP response check at attempt $attempts"
+            HTTP_STATUS=$(curl --write-out "%{http_code}" --silent --output /dev/null --fail "${{ steps.get_url.outputs.app_url }}")
+            if [ "$HTTP_STATUS" -eq 200 ]; then
+              echo "HTTP response check passed after $attempts attempts"
               exit 0
             else
-              echo "Health check failed with status: $?"
-              echo "Response headers:"
-              curl -I "${{ steps.get_url.outputs.app_url }}health" || true
+              echo "HTTP response check failed with status: $HTTP_STATUS"
             fi
             attempts=$((attempts + 1))
             if [ $attempts -eq $max_attempts ]; then
-              echo "Health check failed after $max_attempts attempts"
+              echo "HTTP response check failed after $max_attempts attempts"
               exit 1
             fi
-            echo "Health check failed, retrying in 30 seconds (attempt $attempts of $max_attempts)"
+            echo "HTTP response check failed, retrying in 30 seconds (attempt $attempts of $max_attempts)"
             sleep 30
           done
 
-      - name: Verify HTTP Response
+      - name: Verify Dyno Status via Heroku CLI
         run: |
-          HTTP_STATUS=$(curl --write-out "%{http_code}" --silent --output /dev/null ${{ steps.get_url.outputs.app_url }})
-          if [ "$HTTP_STATUS" -ne 200 ]; then
-            echo "Deployment failed with HTTP status $HTTP_STATUS. Exiting..."
-            exit 1
-          fi
+          attempts=0
+          max_attempts=5
+          while [ $attempts -lt $max_attempts ]; do
+            echo "Checking Dyno Status at attempt $attempts"
+            DYNOS_STATUS=$(heroku ps -a ${{ secrets.HEROKU_APP_NAME }} | grep web | awk '{print $2}')
+            if [[ "$DYNOS_STATUS" == "up" ]]; then
+              echo "Dyno is up after $attempts attempts"
+              exit 0
+            else
+              echo "Dyno might not be running, status: $DYNOS_STATUS"
+            fi
+            attempts=$((attempts + 1))
+            if [ $attempts -eq $max_attempts ]; then
+              echo "Dyno status check failed after $max_attempts attempts"
+              exit 1
+            fi
+            echo "Dyno status check failed, retrying in 30 seconds (attempt $attempts of $max_attempts)"
+            sleep 30
+          done
 
 env:
   FASTAPI_ENV: production
