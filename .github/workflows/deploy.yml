@@ -202,22 +202,32 @@ jobs:
           heroku_email: ${{ secrets.HEROKU_EMAIL }}
           usedocker: true
 
+      - name: Get Heroku App URL
+      id: get_url
+      run: |
+        APP_URL=$(heroku info -s --app ${{ secrets.HEROKU_APP_NAME }} | grep web_url | cut -d= -f2)
+        echo "app_url=$APP_URL" >> $GITHUB_OUTPUT
+
       - name: Scale dynos
         run: |
           heroku ps:scale web=1 --app ${{ secrets.HEROKU_APP_NAME }}
 
-      - name: Check deployment status
-        run: |
-          heroku open --app ${{ secrets.HEROKU_APP_NAME }}
-
       - name: Health Check
         run: |
-          sleep 30
-          curl --fail https://${{ secrets.HEROKU_APP_NAME }}.herokuapp.com || exit 1
+          for i in {1..10}; do
+            if curl --fail -s -o /dev/null "${{ steps.get_url.outputs.app_url }}/health"; then
+              echo "Health check passed after $i attempts"
+              exit 0
+            fi
+            echo "Health check failed, retrying in 30 seconds"
+            sleep 30
+          done
+          echo "Health check failed after 10 attempts"
+          exit 1
 
       - name: Verify HTTP Response
         run: |
-          HTTP_STATUS=$(curl --write-out "%{http_code}" --silent --output /dev/null https://${{ secrets.HEROKU_APP_NAME }}.herokuapp.com)
+          HTTP_STATUS=$(curl --write-out "%{http_code}" --silent --output /dev/null ${{ steps.get_url.outputs.app_url }})
           if [ "$HTTP_STATUS" -ne 200 ]; then
             echo "Deployment failed with HTTP status $HTTP_STATUS. Exiting..."
             exit 1
