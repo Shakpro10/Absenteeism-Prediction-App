@@ -221,7 +221,7 @@ jobs:
           attempts=0
           max_attempts=2
           while [ $attempts -lt $max_attempts ]; do
-            if curl --fail -s -o /dev/null "${{ steps.get_url.outputs.app_url }}/health"; then
+            if curl --fail -s -o /dev/null "${{ steps.get_url.outputs.app_url }}health"; then
               echo "Health check passed after $attempts attempts"
               exit 0
             fi
