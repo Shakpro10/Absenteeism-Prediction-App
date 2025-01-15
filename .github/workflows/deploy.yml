@@ -214,29 +214,29 @@ jobs:
 
       - name: Wait for Heroku Dyno to Start
         run: |
-          sleep 60
+          sleep 30
 
       - name: Health Check with Increased Verbosity
         run: |
           attempts=0
-          max_attempts=5
+          max_attempts=2
           while [ $attempts -lt $max_attempts ]; do
             echo "Attempting health check at attempt $attempts"
-            if curl --verbose --fail -s -o /dev/null "${{ steps.get_url.outputs.app_url }}/health"; then
+            if curl --verbose --fail -s -o /dev/null "${{ steps.get_url.outputs.app_url }}health"; then
               echo "Health check passed after $attempts attempts"
               exit 0
             else
               echo "Health check failed with status: $?"
               echo "Response headers:"
-              curl -I "${{ steps.get_url.outputs.app_url }}/health" || true
+              curl -I "${{ steps.get_url.outputs.app_url }}health" || true
             fi
             attempts=$((attempts + 1))
             if [ $attempts -eq $max_attempts ]; then
               echo "Health check failed after $max_attempts attempts"
               exit 1
             fi
-            echo "Health check failed, retrying in 60 seconds (attempt $attempts of $max_attempts)"
-            sleep 60
+            echo "Health check failed, retrying in 30 seconds (attempt $attempts of $max_attempts)"
+            sleep 30
           done
 
       - name: Verify HTTP Response
