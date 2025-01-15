@@ -212,18 +212,27 @@ jobs:
         run: |
           heroku ps:scale web=1 --app ${{ secrets.HEROKU_APP_NAME }}
 
-      - name: Health Check
+      - name: Wait for Heroku Dyno to Start
         run: |
-          for i in {1..10}; do
+          sleep 30
+
+      - name: Health Check with Two Attempts
+        run: |
+          attempts=0
+          max_attempts=2
+          while [ $attempts -lt $max_attempts ]; do
             if curl --fail -s -o /dev/null "${{ steps.get_url.outputs.app_url }}/health"; then
-              echo "Health check passed after $i attempts"
+              echo "Health check passed after $attempts attempts"
               exit 0
             fi
-            echo "Health check failed, retrying in 30 seconds"
+            attempts=$((attempts + 1))
+            if [ $attempts -eq $max_attempts ]; then
+              echo "Health check failed after $max_attempts attempts"
+              exit 1
+            fi
+            echo "Health check failed, retrying in 30 seconds (attempt $attempts of $max_attempts)"
             sleep 30
           done
-          echo "Health check failed after 10 attempts"
-          exit 1
 
       - name: Verify HTTP Response
         run: |
