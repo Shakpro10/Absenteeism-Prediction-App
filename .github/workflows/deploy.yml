@@ -203,10 +203,10 @@ jobs:
           usedocker: true
 
       - name: Get Heroku App URL
-      id: get_url
-      run: |
-        APP_URL=$(heroku info -s --app ${{ secrets.HEROKU_APP_NAME }} | grep web_url | cut -d= -f2)
-        echo "app_url=$APP_URL" >> $GITHUB_OUTPUT
+        id: get_url
+        run: |
+          APP_URL=$(heroku info -s --app ${{ secrets.HEROKU_APP_NAME }} | grep web_url | cut -d= -f2)
+          echo "app_url=$APP_URL" >> $GITHUB_OUTPUT
 
       - name: Scale dynos
         run: |
