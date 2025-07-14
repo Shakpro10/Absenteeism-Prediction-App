@@ -59,6 +59,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Restore Virtual Environment
+        uses: actions/cache@v4
+        with:
+          path: fastapienv
+          key: ${{ runner.os }}-python-${{ hashFiles('requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-python-
+
       - name: Reuse Virtual Environment and Run flake8 linting
         run: |
           source ${{ needs.setup.outputs.venv_path }}/bin/activate
@@ -86,6 +94,14 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Restore Virtual Environment
+        uses: actions/cache@v4
+        with:
+          path: fastapienv
+          key: ${{ runner.os }}-python-${{ hashFiles('requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-python-
         
       - name: Reuse Virtual Environment and Run tests
         run: |
