@@ -172,7 +172,7 @@ ________________________________________
 
 ## Deployment
 
-The app is deployed on Heroku and accessible through the following URL: <strong>https://absenteeism-predictor-95f9fbe5a2b8.herokuapp.com/</strong>
+The app is deployed on Heroku and accessible through the following URL: <strong>https://5c9hnnqt8n.us-east-1.awsapprunner.com</strong>
 ________________________________________
 <br>
 
