@@ -59,27 +59,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Restore Virtual Environment Cache 
-        uses: actions/cache@v4
-        with:
-          path: fastapienv
-          key: ${{ runner.os }}-python-${{ hashFiles('requirements.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-python-
-
-      - name: Debugging step - Verify Virtual Environment Path
-        run: |
-          echo "venv path in build: ${{ needs.setup.outputs.venv_path }}"
-          ls -l ${{ needs.setup.outputs.venv_path }}
-
-      - name: Debugging Environment Before Linting
-        run: |
-          echo "Debugging Environment:"
-          source ${{ needs.setup.outputs.venv_path }}/bin/activate
-          python --version
-          pip list
-          ls -l ${{ needs.setup.outputs.venv_path }}
-
       - name: Reuse Virtual Environment and Run flake8 linting
         run: |
           source ${{ needs.setup.outputs.venv_path }}/bin/activate
@@ -92,7 +71,6 @@ jobs:
             done < logs/flake8.log
           fi
         shell: bash
-
 
       - name: Upload flake8 Logs
         uses: actions/upload-artifact@v3
@@ -108,20 +86,7 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
-      - name: Restore Virtual Environment Cache 
-        uses: actions/cache@v4
-        with:
-          path: fastapienv
-          key: ${{ runner.os }}-python-${{ hashFiles('requirements.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-python-
-
-      - name: Debugging step - Verify Virtual Environment Path
-        run: |
-          echo "venv path in test: ${{ needs.setup.outputs.venv_path }}"
-          ls -l ${{ needs.setup.outputs.venv_path }}
-
+        
       - name: Reuse Virtual Environment and Run tests
         run: |
           source ${{ needs.setup.outputs.venv_path }}/bin/activate
@@ -182,38 +147,51 @@ jobs:
           path: logs/
 
   deploy:
-    name: Deploy to Heroku
+    name: Deploy to AWS App Runner
     runs-on: ubuntu-latest
     needs: dockerize
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Install Heroku CLI
-        run: |
-          curl https://cli-assets.heroku.com/install.sh | sh
-
-      - name: Login to Heroku
-        uses: akhileshns/heroku-deploy@v3.13.15
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
         with:
-          heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
-          heroku_app_name: ${{ secrets.HEROKU_APP_NAME }}
-          heroku_email: ${{ secrets.HEROKU_EMAIL }}
-          usedocker: true
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
 
-      - name: Get Heroku App URL
-        id: get_url
-        run: |
-          APP_URL=$(heroku info -s --app ${{ secrets.HEROKU_APP_NAME }} | grep web_url | cut -d= -f2)
-          echo "app_url=$APP_URL" >> $GITHUB_OUTPUT
+      - name: Log in to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
 
-      - name: Scale dynos
+      - name: Pull Docker image from Docker Hub
         run: |
-          heroku ps:scale web=1 --app ${{ secrets.HEROKU_APP_NAME }}
+          docker pull ${{ secrets.DOCKER_USERNAME }}/absenteeism_prediction_app:${{ github.sha }}
 
-      - name: Wait for Heroku Dyno to Start
+      - name: Tag image for ECR
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
+          IMAGE_TAG: latest
         run: |
+          docker tag ${{ secrets.DOCKER_USERNAME }}/absenteeism_prediction_app:${{ github.sha }} $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+
+      - name: Push image to ECR
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
+          IMAGE_TAG: latest
+        run: |
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+
+      - name: Deploy to AWS App Runner
+        run: |
+          aws apprunner update-service \
+            --service-arn ${{ secrets.APP_RUNNER_SERVICE_ARN }} \
+            --source-configuration ImageRepository="{ImageIdentifier=${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_REPOSITORY }}:latest,ImageRepositoryType=\"ECR\"}"
+
+      - name: Wait for App Runner to stabilize
+        run: |
+          echo "Waiting 30 seconds for AWS App Runner service to become active..."
           sleep 30
 
       - name: HTTP Response Check
@@ -222,7 +200,7 @@ jobs:
           max_attempts=2
           while [ $attempts -lt $max_attempts ]; do
             echo "Attempting HTTP response check at attempt $attempts"
-            HTTP_STATUS=$(curl --write-out "%{http_code}" --silent --output /dev/null --fail "${{ steps.get_url.outputs.app_url }}")
+            HTTP_STATUS=$(curl --write-out "%{http_code}" --silent --output /dev/null --fail "${{ secrets.APP_RUNNER_URL }}")
             if [ "$HTTP_STATUS" -eq 200 ]; then
               echo "HTTP response check passed after $attempts attempts"
               exit 0
@@ -234,31 +212,9 @@ jobs:
               echo "HTTP response check failed after $max_attempts attempts"
               exit 1
             fi
-            echo "HTTP response check failed, retrying in 30 seconds (attempt $attempts of $max_attempts)"
+            echo "Retrying in 30 seconds (attempt $attempts of $max_attempts)"
             sleep 30
           done
-
-      - name: Verify Dyno Status via Heroku CLI
-        run: |
-          attempts=0
-          max_attempts=2
-          while [ $attempts -lt $max_attempts ]; do
-            echo "Checking Dyno Status at attempt $attempts"
-            DYNOS_STATUS=$(heroku ps -a ${{ secrets.HEROKU_APP_NAME }} | grep web | grep -o 'up\|down')
-            if [[ "$DYNOS_STATUS" == "up" ]]; then
-              echo "Dyno is up after $attempts attempts"
-              exit 0
-            else
-              echo "Dyno might not be running, status: $DYNOS_STATUS"
-            fi
-            attempts=$((attempts + 1))
-            if [ $attempts -eq $max_attempts ]; then
-              echo "Dyno status check failed after $max_attempts attempts"
-              exit 1
-            fi
-            echo "Dyno status check failed, retrying in 30 seconds (attempt $attempts of $max_attempts)"
-            sleep 30
-          done
-
+          
 env:
   FASTAPI_ENV: production
