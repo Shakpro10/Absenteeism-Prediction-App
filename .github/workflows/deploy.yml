@@ -73,7 +73,7 @@ jobs:
         shell: bash
 
       - name: Upload flake8 Logs
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: flake8-logs
           path: logs/
@@ -101,7 +101,7 @@ jobs:
         shell: bash
         
       - name: Upload Logs Folder
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: test-logs
           path: logs/
@@ -141,7 +141,7 @@ jobs:
           docker run --rm ${{ secrets.DOCKER_USERNAME }}/absenteeism_prediction_app:${{ github.sha }} python -m pytest test.py > logs/docker_test.log || exit 1
 
       - name: Upload Logs Folder
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: docker-test-logs
           path: logs/
@@ -215,6 +215,6 @@ jobs:
             echo "Retrying in 30 seconds (attempt $attempts of $max_attempts)"
             sleep 30
           done
-          
+
 env:
   FASTAPI_ENV: production
