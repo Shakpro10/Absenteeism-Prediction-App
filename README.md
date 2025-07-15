@@ -1,4 +1,4 @@
-# Absenteeism Prediction App (<strong>https://absenteeism-predictor-95f9fbe5a2b8.herokuapp.com/</strong>)
+# Absenteeism Prediction App (<strong>https://5c9hnnqt8n.us-east-1.awsapprunner.com</strong>)
 
 This application predicts the likelihood of employee absenteeism in an organization. The model determines whether a worker is <strong>excessively absent</strong> or <strong>moderately to not absent</strong> based on various input features.
 ________________________________________
